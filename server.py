@@ -1,34 +1,24 @@
-import http.server
-import socketserver
+
+from transformers import BertTokenizer, BertForSequenceClassification
+import torch
 import json
 
-with open('data.json', 'r') as f:
-    data = json.load(f)
+# load the bert model and tokenizer 
+tokenizer = BertTokenizer.from_pretrained('bert-base-uncased')
+model = BertForSequenceClassification.from_pretrained('bert-base-uncased')
 
-responses = data['responses']
+# load responses
+with open('responses.json') as f:
+    responses = json.load(f)["responses"]
 
-class RequestHandler(http.server.SimpleHTTPRequestHandler):
-    def do_POST(self):
-        content_length = int(self.headers['Content-Length'])
-        post_data = self.rfile.read(content_length).decode('utf-8')
-        data = json.loads(post_data)
-        question = data['question']
-        
-        response = self.get_response(question)
-        
-        self.send_response(200)
-        self.send_header('Content-type', 'application/json')
-        self.end_headers()
-        self.wfile.write(json.dumps({"response": response}).encode('utf-8'))
+# function to classify user question
+def classify_question(question):
+    inputs = tokenizer(question, return_tensors='pt')
+    outputs = model(**inputs)
+    logits = outputs.logits
+    predicted_class_id = torch.argmax(logits).item()
+    return predicted_class_id
 
-    def get_response(self, question):
-        for key in responses.keys():
-            if key in question.lower():
-                return responses[key]
-        return "Üzgünüm, bu soruya cevap veremiyorum."
-
-PORT = 8000
-
-with socketserver.TCPServer(("", PORT), RequestHandler) as httpd:
-    print(f"Serving at port {PORT}")
-    httpd.serve_forever()
+# function to return responses
+def get_response(predicted_class_id):
+    return responses[predicted_class_id]
