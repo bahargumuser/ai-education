@@ -33,12 +33,12 @@
             border-radius: 5px;
         }
         .user-message {
-            background: #007bff;
+            background: linear-gradient(to right, #00c6ff, #007bff);
             color: #fff;
             text-align: right;
         }
         .bot-message {
-            background: #e0e0e0;
+            background: #f1f1f1;
             color: #000;
         }
         #input {
@@ -52,8 +52,7 @@
             padding: 10px;
             border: none;
             border-radius: 5px;
-            background: #007bff;
-            color: #fff;
+            background: #f1f1f1;
             cursor: pointer;
             margin-top: 10px;
         }
@@ -66,18 +65,20 @@
         <button id="send">Send</button>
     </div>
     <script>
-        document.getElementById('send').onclick = async function() {
+        async function sendMessage() {
             const input = document.getElementById('input');
             const messages = document.getElementById('messages');
             const userMessage = input.value;
 
-            // add user message
+            if (userMessage.trim() === "") return;
+
+            // Add user message
             const userMessageDiv = document.createElement('div');
             userMessageDiv.className = 'message user-message';
             userMessageDiv.textContent = userMessage;
             messages.appendChild(userMessageDiv);
 
-            // make a request to the API
+            // Make a request to the API
             const response = await fetch('/chatbot', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -87,16 +88,24 @@
             const responseData = await response.json();
             const botMessage = responseData.response;
 
-            // add bot response
+            // Add bot response
             const botMessageDiv = document.createElement('div');
             botMessageDiv.className = 'message bot-message';
             botMessageDiv.textContent = botMessage;
             messages.appendChild(botMessageDiv);
 
-            // clear the input
+            // Clear the input
             input.value = '';
             messages.scrollTop = messages.scrollHeight;
-        };
+        }
+
+        document.getElementById('send').onclick = sendMessage;
+
+        document.getElementById('input').addEventListener('keyup', function(event) {
+            if (event.key === 'Enter') {
+                sendMessage();
+            }
+        });
     </script>
 </body>
 </html>
