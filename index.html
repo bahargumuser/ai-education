@@ -7,102 +7,118 @@
     <style>
         body {
             font-family: Arial, sans-serif;
-            background-color: #f4f4f4;
+            margin: 0;
+            padding: 0;
             display: flex;
             justify-content: center;
             align-items: center;
             height: 100vh;
-            margin: 0;
+            background-color: #f5f5f5;
         }
-
-        .chat-container {
-            background: #fff;
-            border-radius: 10px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        #chatbot {
             width: 400px;
-            max-width: 100%;
-        }
-
-        .chatbox {
-            display: flex;
-            flex-direction: column;
-            height: 500px;
-        }
-
-        .messages {
-            flex: 1;
             padding: 20px;
+            background: #fff;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            border-radius: 5px;
+        }
+        #messages {
+            max-height: 300px;
             overflow-y: auto;
-            border-bottom: 1px solid #ddd;
+            margin-bottom: 10px;
         }
-
-        .user {
-            background: #007bff;
+        .message {
+            padding: 10px;
+            margin: 5px 0;
+            border-radius: 5px;
+        }
+        .user-message {
+            background: linear-gradient(to right, #00c6ff, #007bff);
             color: #fff;
-            padding: 10px;
-            border-radius: 10px;
-            margin-bottom: 10px;
-            align-self: flex-end;
+            text-align: right;
         }
-
-        .bot {
+        .bot-message {
             background: #f1f1f1;
-            padding: 10px;
-            border-radius: 10px;
-            margin-bottom: 10px;
-            align-self: flex-start;
+            color: #000;
         }
-
-        input[type="text"] {
-            border: none;
-            padding: 15px;
-            font-size: 16px;
-            width: calc(100% - 30px);
-            margin: 15px;
-            border-radius: 25px;
-            box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
+        #input {
+            width: calc(100% - 22px);
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+        #send {
+            width: calc(100% - 20px);
+            padding: 10px;
+            border: 2px solid transparent;
+            border-radius: 5px;
+            background: #f1f1f1;
+            background-clip: padding-box;
+            cursor: pointer;
+            margin-top: 10px;
+            position: relative;
+        }
+        #send::before {
+            content: '';
+            position: absolute;
+            top: -2px;
+            left: -2px;
+            right: -2px;
+            bottom: -2px;
+            border-radius: 7px;
+            background: linear-gradient(to right, #00c6ff, #007bff);
+            z-index: -1;
         }
     </style>
 </head>
 <body>
-    <div class="chat-container">
-        <div class="chatbox">
-            <div class="messages" id="chat-messages"></div>
-            <input type="text" id="user-input" placeholder="Sorunuzu yazın..." onkeydown="if(event.key === 'Enter') sendMessage()">
-        </div>
+    <div id="chatbot">
+        <div id="messages"></div>
+        <input type="text" id="input" placeholder="Type your message here...">
+        <button id="send">Send</button>
     </div>
-
     <script>
-        function sendMessage() {
-            const userInput = document.getElementById('user-input');
-            const message = userInput.value;
-            if (!message) return;
+        async function sendMessage() {
+            const input = document.getElementById('input');
+            const messages = document.getElementById('messages');
+            const userMessage = input.value;
 
-            addMessageToChat('User', message);
-            userInput.value = '';
+            if (userMessage.trim() === "") return;
 
-            fetch('http://localhost:8000/', {
+            // Add user message
+            const userMessageDiv = document.createElement('div');
+            userMessageDiv.className = 'message user-message';
+            userMessageDiv.textContent = userMessage;
+            messages.appendChild(userMessageDiv);
+
+            // Make a request to the API
+            const response = await fetch('/chatbot', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ question: message })
-            })
-            .then(response => response.json())
-            .then(data => {
-                addMessageToChat('Bot', data.response);
-            })
-            .catch(error => {
-                console.error('Error:', error);
+                body: JSON.stringify({ question: userMessage })
             });
+
+            const responseData = await response.json();
+            const botMessage = responseData.response;
+
+            // Add bot response
+            const botMessageDiv = document.createElement('div');
+            botMessageDiv.className = 'message bot-message';
+            botMessageDiv.textContent = botMessage;
+            messages.appendChild(botMessageDiv);
+
+            // Clear the input
+            input.value = '';
+            messages.scrollTop = messages.scrollHeight;
         }
 
-        function addMessageToChat(sender, message) {
-            const chatMessages = document.getElementById('chat-messages');
-            const messageElement = document.createElement('div');
-            messageElement.className = sender.toLowerCase();
-            messageElement.textContent = `${sender}: ${message}`;
-            chatMessages.appendChild(messageElement);
-            chatMessages.scrollTop = chatMessages.scrollHeight;
-        }
+        document.getElementById('send').onclick = sendMessage;
+
+        document.getElementById('input').addEventListener('keyup', function(event) {
+            if (event.key === 'Enter') {
+                sendMessage();
+            }
+        });
     </script>
 </body>
 </html>

@@ -2,7 +2,7 @@ import http.server
 import socketserver
 import json
 
-with open('data.json', 'r') as f:
+with open('data.json', 'r', encoding="utf8") as f:
     data = json.load(f)
 
 responses = data['responses']
