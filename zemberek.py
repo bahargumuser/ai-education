@@ -4,7 +4,7 @@ from jpype.types import JString
 from jpype import JPackage
 import json
 
-# Zemberek JAR dosyasının yolunu belirtin
+# Specify the path to the Zemberek jar file / Zemberek JAR dosyasının yolunu belirtin
 zemberek_jar_path = "zemberek-full.jar"
 
 def start_jvm():
@@ -22,7 +22,7 @@ def shutdown_jvm():
 def get_root_words(sentence):
     start_jvm()
     
-    # Zemberek sınıflarını içe aktarın
+    # Import the Zemberek classes / Zemberek sınıflarını içe aktarın
     TurkishMorphology = JPackage('zemberek').morphology.TurkishMorphology
     morphology = TurkishMorphology.createWithDefaults()
     analysis = morphology.analyzeSentence(JString(sentence))
@@ -51,11 +51,11 @@ def find_synonyms(roots, synonyms_dict):
             synonyms[root] = []
     return synonyms
 
-# Eş anlamlılar sözlüğünü JSON dosyasından yükle
+# Load the synonyms dictionary from the json file / Eş anlamlılar sözlüğünü JSON dosyasından yükle
 synonyms_dict = load_synonyms("synonyms.json")
 
 # Örnek cümle
-sentence = "Bu bir test cümlesidir"
+sentence = "vizyondaki filmler"
 roots = get_root_words(sentence)
 print("Kökler:", roots)
 

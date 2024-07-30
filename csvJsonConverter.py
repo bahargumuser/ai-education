@@ -1,26 +1,26 @@
 import pandas as pd
 import json
 
-# CSV dosyasının yolunu belirtin
+# Specify the path to the CSV file / CVS dosyasının yolu
 csv_file_path = "mnt\data\EsAnlamlilar.csv"
 
-# CSV dosyasını oku
+# Read the CVS file / CVS dosyasını oku
 df = pd.read_csv(csv_file_path)
 
-# CSV dosyasının ilk birkaç satırını görüntüleyelim
+# Let's display the first few rows of the CVS file / CVS dosyasının birkaç satırını görüntüleme
 print(df.head())
 
-# Eş anlamlıları JSON formatına dönüştürmek için bir sözlük oluştur
+# Create a dictionary to convert synonyms to json format /eş anlamlıları json formatına dönüştürmek için bir sözlük oluşturma
 synonyms_dict = {}
 for index, row in df.iterrows():
     key = row[0]
-    values = row[1].split(',')  # Eş anlamlıları virgülle ayırarak bir listeye dönüştür
+    values = row[1].split(',')  # Convert synonyms into a list by splitting them with a comma / eş anlamlıları virgülle ayırarak bir listeye dönüştürme
     synonyms_dict[key] = values
 
-# JSON formatına dönüştür
+# convert to json format / JSON formatına dönüştür
 json_output = json.dumps(synonyms_dict, ensure_ascii=False, indent=4)
 
-# JSON çıktısını bir dosyaya kaydet
+# save the json output to a file / JSON çıktısını bir dosyaya kaydet
 json_file_path = "mnt/data/synonyms.json"
 with open(json_file_path, 'w', encoding='utf-8') as json_file:
     json_file.write(json_output)
